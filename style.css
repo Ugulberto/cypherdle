@@ -203,6 +203,9 @@ main {
     border-radius: 10000px;
     margin-bottom: 10px;
     font-size: 20px;
+    display: flex;
+    justify-content: center;
+    /*animation: appear .5s ease;*/
 }
 
 .clock {
@@ -221,14 +224,47 @@ main {
     border-radius: 100%;
 }
 
-#act {
+.correct {
+    border: none;
     position: relative;
-    z-index: 2300;
+    z-index: 1;
+}
+
+.correct::before {
+    content: "";
+    width: 1px;
+    border: 1px solid lightgray;
+    position: absolute;
+    height: 100%;
+    top: 0;
+    right: 0;
+    opacity: 0;
+    animation: border 0.8s ease forwards, appear 1s ease forwards; 
+    border-radius: 100000px;
+}
+
+.correct::after {
+    background-color: rgb(0, 0, 161);
+    content: "";
+    width: 1px;
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0;
+    animation: border 0.8s ease forwards, appear 1s ease forwards; 
+    border-radius: 100000px;
 }
 
 @keyframes appear {
     from {opacity: 0;}
     to {opacity: 1;}
+}
+
+@keyframes border {
+    from {width: 0;}
+    to {width: 100%;}
 }
 
 @media (max-width: 600px) {
