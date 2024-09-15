@@ -1,143 +1,163 @@
-let but = document.getElementById("act");
-let operations = document.getElementsByClassName("operaciones")[0];
-let cyphers = document.getElementsByClassName("cifras-container")[0];
+document.addEventListener("DOMContentLoaded", () => {
+  let cyphers = Array.from(document.getElementsByClassName("cifra"));
 
-let cifras = document.getElementsByClassName("cifra");
+  let operations = Array.from(document.getElementsByClassName("operation"));
 
-let operaciones = document.getElementsByClassName("operation");
-/*
-let cifrasUp = cifras.slice(0, 6);
-console.log(cifrasUp);
-*/
-/*
-but.onclick = () => {
-    cyphers.style.transform = "translateY(-20vh)";
-    operations.style.transform = "translateY(20vh)";
-    operations.style.opacity = "1";
-}
-*/
+  const operationsContainer = document.getElementsByClassName("operaciones")[0];
 
-function disableBottomButtons() {
-    for (let i = 6; i < cifras.length; i++) {
-        cifras[i].disabled = true;
-        cifras[i].style.opacity = "0.5";
-        cifras[i].style.cursor = "not-allowed";
+  const cyphersContainer =
+    document.getElementsByClassName("cifras-container")[0];
+
+  const operationsContainerScroll = document.getElementsByClassName(
+    "operaciones-container"
+  )[0];
+
+  const cyphersButtonsContainer = document.getElementsByClassName("cifras")[0];
+
+  function enableOperationButtons(operations) {
+    /*
+        Enables the buttons that contain the operation symbols
+        */
+    operations.forEach((operationButton) => {
+      operationButton.disabled = false;
+    });
+  }
+
+  function disableCypherButtons(cyphers) {
+    /*
+        Disables the buttons that contain the six cyphers
+        */
+    cyphers.forEach((button) => {
+      button.disabled = true;
+    });
+  }
+
+  function enableCypherButtons(cyphers) {
+    /*
+    Enables the buttons that contain the six cyphers
+    */
+    cyphers.forEach((button) => {
+      if (!button.classList.contains("selected-cypher"))
+        button.disabled = false;
+    });
+  }
+
+  function disableOperationButtons(operations) {
+    /*
+        Disables the buttons that contain the operation symbols
+        */
+    operations.forEach((operationButton) => {
+      operationButton.disabled = true;
+    });
+  }
+
+  function deselect(type) {
+    cyphers.forEach((button) => {
+      if (button.classList.contains("selected-cypher") && type == "correct") {
+        cyphersButtonsContainer.removeChild(button);
+      }
+      button.classList.remove("selected-cypher");
+    });
+
+    operations.forEach((operationButton) => {
+      operationButton.classList.remove("selected-operation");
+    });
+  }
+
+  disableOperationButtons(operations);
+
+  let cifra1 = null;
+  let op = null;
+  let cifra2 = null;
+
+  function evaluateExpression() {
+    if (cifra1 != null && cifra2 != null && op != null) {
+      if (eval(op) >= 1 && parseInt(eval(op)) == eval(op)) {
+        const expression = `${op}`;
+        const result = eval(expression);
+        console.log(`Expression obtained: ${result}`);
+        const resultButton = document.createElement("button");
+        resultButton.classList.add("cifra");
+        resultButton.innerHTML = result;
+        resultButton.style.animation = "appear .5s ease";
+        cyphersButtonsContainer.appendChild(resultButton);
+        const resultElement = document.createElement("div");
+        resultElement.classList.add("operacion");
+        resultElement.innerHTML = `${cifra1} ${op[7]} ${cifra2} = ${result}`;
+        resultElement.style.animation = "appear .5s ease";
+        operationsContainerScroll.appendChild(resultElement);
+        cyphersContainer.style.transform = "translateY(-20vh)";
+        operationsContainer.style.transform = "translateY(20vh)";
+        operationsContainer.style.opacity = "1";
+        deselect("correct");
+        enableCypherButtons(cyphers);
+        disableOperationButtons(operations);
+        game();
+      } else {
+        deselect("incorrect");
+        enableCypherButtons(cyphers);
+        game();
+      }
     }
-}
+  }
+  function game() {
+    cifra1 = null;
+    cifra2 = null;
+    op = null;
+    console.log(cifra1, op, cifra2);
+    cyphers = Array.from(document.getElementsByClassName("cifra"));
+    const handleCypherClick = (cypherButton) => {
+      if (cifra1 === null) {
+        cifra1 = parseInt(cypherButton.innerHTML, 10);
+        cypherButton.classList.add("selected-cypher");
+        disableCypherButtons(cyphers);
+        enableOperationButtons(operations);
+        console.log(cifra1, op, cifra2);
+      } else if (cifra2 === null) {
+        cifra2 = parseInt(cypherButton.innerHTML, 10);
+        cypherButton.classList.add("selected-cypher");
+        disableCypherButtons(cyphers);
+        evaluateExpression();
+        console.log(cifra1, op, cifra2);
+      }
+    };
 
-function disableOperationButtons() {
-    for (let i = 0; i < operaciones.length; i++) {
-        operaciones[i].disabled = true;
-        operaciones[i].style.opacity = "0.5";
-        operaciones[i].style.cursor = "not-allowed";
-    }
-}
-
-function disableButton(i) {
-    cifras[i].disabled = true;
-    cifras[i].style.opacity = "0.5";
-    cifras[i].style.cursor = "not-allowed";
-}
-
-function disableOperation(i) {
-    operaciones[i].disabled = true;
-    operaciones[i].style.opacity = "0.5";
-    operaciones[i].style.cursor = "not-allowed";
-}
-
-function selectButtonStyle(pos, type, color) {
-    if (type == "operation") {        
-        operaciones[pos].style.border = `1px solid ${color}`;
-        operaciones[pos].style.backgroundColor = `${color}`;
-    } else {
-        cifras[pos].style.border = `1px solid ${color}`;
-        cifras[pos].style.color = `${color}`;
-    }
-}
-
-function disableButtons(type) {
-    if (type == "operation") {
-        for (let i = 0; i < operaciones.length; i++) {
-            disableOperation(i);
+    const handleOperationClick = (operationButton) => {
+      op = operationButton.innerHTML;
+      const iconToString = () => {
+        if (op.includes("fa-plus")) {
+          return "cifra1 + cifra2";
+        } else if (op.includes("fa-minus")) {
+          return "cifra1 - cifra2";
+        } else if (op.includes("fa-xmark")) {
+          return "cifra1 * cifra2";
+        } else if (op.includes("fa-divide")) {
+          return "cifra1 / cifra2";
         }
-    } else {
-        for (let i = 0; i < cifras.length; i++) {
-            disableButton(i);
-        }
-    }
-}
+      };
 
-function enableOperations() {
-    for (let i = 0; i < operaciones.length; i++) {
-        operaciones[i].disabled = false;
-        operaciones[i].style.opacity = "1";
-        operaciones[i].style.cursor = "pointer";
-    }
-}
+      op = iconToString();
+      operationButton.classList.add("selected-operation");
+      disableOperationButtons(operations);
+      enableCypherButtons(cyphers);
+      if (cifra1 !== null && cifra2 !== null && op !== null) {
+        evaluateExpression();
+      }
+    };
 
-function enableBottomButtons() {
-    for (let i = 6; i < cifras.length; i++) {
-        cifras[i].disabled = false;
-        cifras[i].style.opacity = "1";
-        cifras[i].style.cursor = "pointer";
-    }
-}
+    // Agregar el event listener a cada botón de cifra
+    cyphers.forEach((cypherButton) => {
+      cypherButton.addEventListener("click", () =>
+        handleCypherClick(cypherButton)
+      );
+    });
 
-function operation() {
-
-    let cifra1 = 0;
-    let op = '';
-    let cifra2 = 0;
-
-    disableBottomButtons();
-    disableOperationButtons();
-    for (let i = 0; i < cifras.length/2; i++) {
-        cifras[i].addEventListener("click", () => {
-            cifra1 = parseInt(cifras[i].innerHTML);
-            selectButtonStyle(i, "cypher","#ff2957");
-            enableOperations();
-            disableButtons("cypher");
-        })
-    }
-    console.log(cifra1);
-    
-    for (let i = 0; i < operaciones.length; i++) {
-        operaciones[i].addEventListener("click", () => {
-            op = operaciones[i].innerHTML;
-            selectButtonStyle(i, "operation", "#0073ff");
-            disableButtons("operation");
-            enableBottomButtons();
-        })
-    }
-    
-    
-    for (let i = 6; i < cifras.length; i++) {
-        cifras[i].addEventListener("click", () => {
-            cifra2 = parseInt(cifras[i].innerHTML);
-            selectButtonStyle(i, "cypher","#ff2957");
-            disableButtons("cypher");
-            console.log(op);
-            op = op.trim();
-            let res = () => {
-                if (op == "<i class=\"fa-solid fa-plus\"></i>") {
-                    return [cifra1, "+", cifra2, cifra1 + cifra2];
-                } else if (op == "<i class=\"fa-solid fa-minus\"></i>") {
-                    return [cifra1, "-", cifra2, cifra1 - cifra2];
-                } else if (op == "<i class=\"fa-solid fa-xmark\"></i>") {
-                    return [cifra1, "x", cifra2, cifra1 * cifra2];
-                } else if (op == "<i class=\"fa-solid fa-divide\"></i>"){        
-                    return [cifra1, "/", cifra2, cifra1 / cifra2];
-                }
-            }
-            if (typeof res() == "array") {
-                return res();
-            }
-        })
-    }
-}
-
-window.onload = () => {
-    if (operation()[3] != undefined) {
-        console.log(operation()[3]);
-    }
-}
+    // Agregar el event listener a cada botón de operación
+    operations.forEach((operationButton) => {
+      operationButton.addEventListener("click", () =>
+        handleOperationClick(operationButton)
+      );
+    });
+  }
+  game();
+});
