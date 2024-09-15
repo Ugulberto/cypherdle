@@ -69,6 +69,49 @@ document.addEventListener("DOMContentLoaded", () => {
   let cifra1 = null;
   let op = null;
   let cifra2 = null;
+  let hasAddedEventListener = 0;
+  let numberOperations = 0;
+  let cifraExacta = 37;
+
+  const handleCypherClick = (cypherButton) => {
+    if (cifra1 === null) {
+      console.log("evento");
+      cifra1 = parseInt(cypherButton.innerHTML, 10);
+      cypherButton.classList.add("selected-cypher");
+      disableCypherButtons(cyphers);
+      enableOperationButtons(operations);
+      console.log(cifra1, op, cifra2);
+      cifra2 = null;
+    } else if (cifra2 === null) {
+      cifra2 = parseInt(cypherButton.innerHTML, 10);
+      cypherButton.classList.add("selected-cypher");
+      disableCypherButtons(cyphers);
+      evaluateExpression();
+      console.log(cifra1, op, cifra2);
+    }
+  };
+
+  const handleOperationClick = (operationButton) => {
+    op = operationButton.innerHTML;
+    const iconToString = () => {
+      if (op.includes("fa-plus")) {
+        return "cifra1 + cifra2";
+      } else if (op.includes("fa-minus")) {
+        return "cifra1 - cifra2";
+      } else if (op.includes("fa-xmark")) {
+        return "cifra1 * cifra2";
+      } else if (op.includes("fa-divide")) {
+        return "cifra1 / cifra2";
+      }
+    };
+    op = iconToString();
+      operationButton.classList.add("selected-operation");
+      disableOperationButtons(operations);
+      enableCypherButtons(cyphers);
+      if (cifra1 !== null && cifra2 !== null && op !== null) {
+        evaluateExpression();
+      }
+    };
 
   function evaluateExpression() {
     if (cifra1 != null && cifra2 != null && op != null) {
@@ -79,19 +122,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const resultButton = document.createElement("button");
         resultButton.classList.add("cifra");
         resultButton.innerHTML = result;
-        resultButton.style.animation = "appear .5s ease";
+        resultButton.addEventListener("click", () => {
+            handleCypherClick(resultButton);
+        })
         cyphersButtonsContainer.appendChild(resultButton);
         const resultElement = document.createElement("div");
         resultElement.classList.add("operacion");
         resultElement.innerHTML = `${cifra1} ${op[7]} ${cifra2} = ${result}`;
         resultElement.style.animation = "appear .5s ease";
         operationsContainerScroll.appendChild(resultElement);
+        if (result == cifraExacta) {
+            resultElement.classList.add("correct");
+        }
         cyphersContainer.style.transform = "translateY(-20vh)";
         operationsContainer.style.transform = "translateY(20vh)";
         operationsContainer.style.opacity = "1";
         deselect("correct");
         enableCypherButtons(cyphers);
         disableOperationButtons(operations);
+        numberOperations++;
         game();
       } else {
         deselect("incorrect");
@@ -100,58 +149,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
+
   function game() {
     cifra1 = null;
-    cifra2 = null;
     op = null;
-    console.log(cifra1, op, cifra2);
-    cyphers = Array.from(document.getElementsByClassName("cifra"));
-    const handleCypherClick = (cypherButton) => {
-      if (cifra1 === null) {
-        cifra1 = parseInt(cypherButton.innerHTML, 10);
-        cypherButton.classList.add("selected-cypher");
-        disableCypherButtons(cyphers);
-        enableOperationButtons(operations);
-        console.log(cifra1, op, cifra2);
-      } else if (cifra2 === null) {
-        cifra2 = parseInt(cypherButton.innerHTML, 10);
-        cypherButton.classList.add("selected-cypher");
-        disableCypherButtons(cyphers);
-        evaluateExpression();
-        console.log(cifra1, op, cifra2);
-      }
-    };
-
-    const handleOperationClick = (operationButton) => {
-      op = operationButton.innerHTML;
-      const iconToString = () => {
-        if (op.includes("fa-plus")) {
-          return "cifra1 + cifra2";
-        } else if (op.includes("fa-minus")) {
-          return "cifra1 - cifra2";
-        } else if (op.includes("fa-xmark")) {
-          return "cifra1 * cifra2";
-        } else if (op.includes("fa-divide")) {
-          return "cifra1 / cifra2";
-        }
-      };
-
-      op = iconToString();
-      operationButton.classList.add("selected-operation");
-      disableOperationButtons(operations);
-      enableCypherButtons(cyphers);
-      if (cifra1 !== null && cifra2 !== null && op !== null) {
-        evaluateExpression();
-      }
-    };
-
+    cifra2 = null;
+    cyphers = document.querySelectorAll(".cifra");
     // Agregar el event listener a cada botón de cifra
     cyphers.forEach((cypherButton) => {
-      cypherButton.addEventListener("click", () =>
-        handleCypherClick(cypherButton)
-      );
+      if (hasAddedEventListener < 6) {
+        hasAddedEventListener++;
+        cypherButton.addEventListener("click", () =>
+          handleCypherClick(cypherButton)
+        );
+      }
     });
-
     // Agregar el event listener a cada botón de operación
     operations.forEach((operationButton) => {
       operationButton.addEventListener("click", () =>
